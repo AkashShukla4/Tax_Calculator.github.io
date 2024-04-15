@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tax Calculator</title>
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .question-icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: url("question-mark-icon.png") no-repeat;
+        background-size: cover;
+        cursor: pointer;
+        margin-left: 5px;
+      }
+
+      .error-icon {
+        display: none;
+        position: absolute;
+        bottom: -10%;
+        right: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        background-color: rgba(159, 14, 14, 0);
+        border-radius: 50%;
+        text-align: center;
+        line-height: 20px;
+        color: white;
+        font-size: 12px;
+      }
+      /* CSS for crackers animation */
+      /* CSS for crackers animation */
+      @keyframes cracker-pop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.3);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .cracker-left,
+      .cracker-right {
+        position: absolute;
+        top: 0;
+        width: 50px;
+        height: 50px;
+        background-image: url("cracker.png"); /* You need to replace 'cracker.png' with your cracker image */
+        background-size: contain;
+      }
+
+      .cracker-pop {
+        animation: cracker-pop 0.5s linear;
+      }
+
+      .error-icon:hover + .tooltip {
+        display: block !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h1 class="card-title text-center">Tax Calculator</h1>
+              <form id="taxForm">
+                <div class="form-group">
+                  <label for="income">
+                    Enter Gross Annual Income
+                    <span class="question-icon" onclick="showInfo('incomeInfo')"
+                      >?</span
+                    >
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter gross annual income"
+                    class="form-control"
+                    id="income"
+                  />
+                  <div
+                    id="incomeError"
+                    class="error-icon"
+                    title="Gross Annual Income is required"
+                  ></div>
+                </div>
+                <div class="form-group">
+                  <label for="extraIncome">
+                    Enter Extra Income
+                    <span class="question-icon" onclick="showInfo('extraInfo')"
+                      >?</span
+                    >
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter gross extra income"
+                    class="form-control"
+                    id="extraIncome"
+                  />
+                  <div
+                    id="extraError"
+                    class="error-icon"
+                    title="Extra Income is required"
+                  ></div>
+                </div>
+                <div class="form-group">
+                  <label for="age">
+                    Select Age Group
+                    <span class="question-icon" onclick="showInfo('ageInfo')"
+                      >?</span
+                    >
+                  </label>
+                  <select class="form-control" id="age">
+                    <option value="" selected disabled>Select Age Group</option>
+                    <option value="<40">&lt; 40</option>
+                    <option value=">=40&<60">&ge; 40 &lt; 60</option>
+                    <option value=">=60">&ge; 60</option>
+                  </select>
+                  <div
+                    id="ageError"
+                    class="error-icon"
+                    title="Age Group is required"
+                  ></div>
+                </div>
+                <div class="form-group">
+                  <label for="deductions">
+                    Enter Total Applicable Deductions
+                    <span
+                      class="question-icon"
+                      onclick="showInfo('deductionsInfo')"
+                      >?</span
+                    >
+                  </label>
+                  <input type="text" class="form-control" id="deductions" />
+                  <div
+                    id="deductionsError"
+                    class="error-icon"
+                    title="Total Applicable Deductions is required"
+                  ></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  Calculate Tax
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="incomeModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="incomeModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="incomeModalLabel">Income Summary</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="cracker-left"></div>
+            <div class="cracker-right"></div>
+            <p class="text-center">
+              Your overall income after tax deductions will be
+            </p>
+            <p class="display-4 text-center text-primary" id="incomeAmount"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-purple" data-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#taxForm").submit(function (event) {
+          event.preventDefault();
+          var income = parseFloat($("#income").val());
+          var extraIncome = parseFloat($("#extraIncome").val());
+          var age = $("#age").val();
+          var deductions = parseFloat($("#deductions").val());
+
+          // Calculate taxable income
+          var taxableIncome = Math.max(0, income + extraIncome - deductions);
+
+          // Calculate tax
+          var tax = 0;
+
+          if (taxableIncome <= 8) {
+            // No tax for income <= 8 Lakhs
+            tax = 0;
+          } else {
+            // Calculate tax based on age and income over 8 Lakhs
+            var incomeOver8 = taxableIncome - 8;
+            if (age === "<40") {
+              tax = 0.3 * incomeOver8;
+            } else if (age === ">=40&<60") {
+              tax = 0.4 * incomeOver8;
+            } else if (age === ">=60") {
+              tax = 0.1 * incomeOver8;
+            }
+          }
+
+          // Display income summary in a modal box
+          displayIncomeSummary(tax);
+        });
+
+        // Function to display income summary in modal
+        function displayIncomeSummary(tax) {
+          $("#incomeAmount").text(tax.toFixed(2));
+          $("#incomeModal").modal("show");
+
+          // Trigger animation after modal is shown
+          $("#incomeModal").on("shown.bs.modal", function () {
+            $(".cracker-left").addClass("cracker-pop");
+            $(".cracker-right").addClass("cracker-pop");
+          });
+        }
+      });
+
+      function showInfo(field) {
+        var info = {
+          incomeInfo:
+            "Gross Annual Income is the total amount of money earned in a year before taxes and other deductions.",
+          extraInfo:
+            "Extra Income refers to any additional income earned beyond the regular salary or wages.",
+          ageInfo:
+            "Age Group determines the applicable tax rates and deductions based on the taxpayer's age.",
+          deductionsInfo:
+            "Total Applicable Deductions represent the sum of all deductions eligible for reducing taxable income.",
+        };
+        alert(info[field]);
+      }
+    </script>
+  </body>
+</html>
